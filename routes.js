@@ -11,8 +11,6 @@ app.route('/').get((req, res) => {
 
 app.route('/login').post(passport.authenticate('local',{ failureRedirect: '/' }),
   (req,res)=>{
-    //app.set('view engine', 'pug');
-    //res.redirect('/profile').render('profile', { username: req.user.username});
     res.redirect('/profile');
 });
 
@@ -27,7 +25,6 @@ function ensureAuthenticated(req, res, next) {
 };
 
 app.route('/profile').get(ensureAuthenticated,(req,res)=>{
-    //res.redirect('/profile');
     res.render('profile', { username: req.user.username});
 });
 
