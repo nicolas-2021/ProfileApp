@@ -13,10 +13,16 @@ app.use(express.urlencoded({ extended: true }));
 
 const session = require('express-session');
 const passport = require('passport');
+
 const LocalStrategy = require('passport-local');
+
 const routes = require('./routes.js');
 const auth = require('./auth.js');
+
 const { ObjectID } = require('mongodb');
+
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -30,9 +36,18 @@ app.use(passport.session());
 
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users');
+ 
   auth(app,myDataBase);
   routes(app,myDataBase);
-  
+  io.on('connection', socket => {
+    let currentUsers = 0;
+    console.log('A user has connected');
+    ++currentUsers;
+    io.emit('user count', currentUsers);
+    socket.on('user count', function(data){
+      console.log(data);
+    });
+  });
 
   // Be sure to change the title
 
@@ -55,6 +70,6 @@ myDB(async client => {
 
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+/*app*/http.listen(PORT, () => {
   console.log('Listening on port ' + PORT);
 });
