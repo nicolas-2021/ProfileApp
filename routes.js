@@ -1,5 +1,7 @@
 const passport = require('passport');
 const bcrypt = require('bcrypt');//para implementar Hashs
+const { ObjectID } = require('mongodb');
+const LocalStrategy = require('passport-local');
 module.exports = function (app, myDataBase) {
 app.route('/').get((req, res) => {
     app.set('view engine', 'pug');
@@ -9,8 +11,9 @@ app.route('/').get((req, res) => {
 
 app.route('/login').post(passport.authenticate('local',{ failureRedirect: '/' }),
   (req,res)=>{
-    app.set('view engine', 'pug');
-    res.redirect('/profile').render('profile', { username: req.user.username});
+    //app.set('view engine', 'pug');
+    //res.redirect('/profile').render('profile', { username: req.user.username});
+    res.redirect('/profile');
 });
 
 //req.user guarda la informacion si el usuario se registra correctamente.
@@ -24,7 +27,8 @@ function ensureAuthenticated(req, res, next) {
 };
 
 app.route('/profile').get(ensureAuthenticated,(req,res)=>{
-    res.redirect('/profile');
+    //res.redirect('/profile');
+    res.render('profile', { username: req.user.username});
 });
 
 app.route('/logout').get((req,res)=>{
@@ -37,13 +41,13 @@ app.route('/logout').get((req,res)=>{
 //para /login: si queremos, accedemos con req.user a la info ingresada; y autenticamos en el primer argumento (pues ya nos habiamos registrado)
 app.route('/register')
 .post((req, res, next) => {
+  const hash = bcrypt.hashSync(req.body.password, 12);
   myDataBase.findOne({ username: req.body.username }, (err, user) => {
     if (err) {
       next(err);
     } else if (user) {
       res.redirect('/');
     } else {
-      const hash = bcrypt.hashSync(req.body.password, 12);
       myDataBase.insertOne({
         username: req.body.username,
         password: hash

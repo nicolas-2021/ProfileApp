@@ -13,8 +13,10 @@ app.use(express.urlencoded({ extended: true }));
 
 const session = require('express-session');
 const passport = require('passport');
+const LocalStrategy = require('passport-local');
 const routes = require('./routes.js');
 const auth = require('./auth.js');
+const { ObjectID } = require('mongodb');
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -23,13 +25,14 @@ app.use(session({
   cookie: { secure: false }
 }));
 
-passport.initialize();
-passport.session();
+app.use(passport.initialize());
+app.use(passport.session());
 
 myDB(async client => {
   const myDataBase = await client.db('database').collection('users');
   auth(app,myDataBase);
   routes(app,myDataBase);
+  
 
   // Be sure to change the title
 

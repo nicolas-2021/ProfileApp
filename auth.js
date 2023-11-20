@@ -1,6 +1,7 @@
 require('dotenv').config();
 const passport = require('passport');
 const { ObjectID } = require('mongodb');
+const bcrypt = require('bcrypt');//para implementar Hashs
 const LocalStrategy = require('passport-local');
 const GitHubStrategy = require('passport-github').Strategy;
 module.exports = function (app, myDataBase) {
@@ -20,8 +21,7 @@ passport.use(new LocalStrategy((username, password, done) => {
       console.log(`User ${username} attempted to log in.`);
       if (err) return done(err);
       if (!user) return done(null, false);
-      const hash = bcrypt.hashSync(user.password, 12);
-      if (!bcrypt.compareSync(hash, user.password)) { 
+      if (!bcrypt.compareSync(password, user.password)) { 
         return done(null, false);
       }
       //if (password !== user.password) return done(null, false);
