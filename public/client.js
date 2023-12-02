@@ -1,6 +1,5 @@
 $(document).ready(function () {
   /*global io*/
-
   // Form submittion with new message in field with id 'm'
   $('form').submit(function () {
     var messageToSend = $('#m').val();
